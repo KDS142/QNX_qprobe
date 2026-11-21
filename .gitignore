@@ -221,3 +221,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# qnx-inspector report bundles
+qnx_report_*.md
+qnx_report_*.json
+.pytest_cache/
+.venv/

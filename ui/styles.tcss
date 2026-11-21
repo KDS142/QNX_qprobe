@@ -1,0 +1,300 @@
+/* styles.tcss - Styling for qnx-inspector Textual TUI */
+
+Screen {
+    background: #0f141c;
+    color: #e6edf3;
+    layout: vertical;
+}
+
+/* Header status bar */
+#header-bar {
+    dock: top;
+    height: 3;
+    background: #161b22;
+    border-bottom: heavy #30363d;
+    padding: 0 1;
+    layout: horizontal;
+    align: left middle;
+}
+
+#header-title {
+    text-style: bold;
+    color: #58a6ff;
+    width: auto;
+    margin-right: 2;
+}
+
+#status-badge {
+    height: 1;
+    padding: 0 1;
+    text-style: bold;
+    border-radius: 1;
+}
+
+.badge-live {
+    background: #238636;
+    color: #ffffff;
+}
+
+.badge-demo {
+    background: #d29922;
+    color: #1f2328;
+}
+
+.badge-error {
+    background: #da3633;
+    color: #ffffff;
+}
+
+#header-sysinfo {
+    margin-left: 2;
+    color: #8b949e;
+    width: 1fr;
+}
+
+#header-threads {
+    width: auto;
+    color: #7ee787;
+    text-style: bold;
+}
+
+/* Main tabbed content area */
+TabbedContent {
+    height: 1fr;
+    background: #0d1117;
+}
+
+ContentTab {
+    text-style: bold;
+    color: #8b949e;
+    padding: 0 2;
+}
+
+ContentTab.-active {
+    color: #58a6ff;
+    border-bottom: heavy #58a6ff;
+}
+
+/* Priority Inversion Alert Banner */
+#inversion-banner {
+    display: none;
+    height: auto;
+    background: #8b1818;
+    color: #ffffff;
+    border: solid #f85149;
+    padding: 1 2;
+    margin: 1;
+    text-style: bold;
+}
+
+#inversion-banner.visible {
+    display: block;
+}
+
+/* Tab 1: Threads & IPC */
+#tab1-container {
+    height: 100%;
+    layout: vertical;
+}
+
+#thread-toolbar {
+    height: 3;
+    layout: horizontal;
+    background: #161b22;
+    padding: 0 1;
+    align: left middle;
+}
+
+#filter-btn {
+    margin-right: 1;
+}
+
+#threads-table {
+    height: 1fr;
+    background: #0d1117;
+}
+
+/* Row highlighting classes */
+.row-inversion-client {
+    background: #490202;
+    color: #ff7b72;
+    text-style: bold;
+}
+
+.row-inversion-server {
+    background: #3a2200;
+    color: #e3b341;
+}
+
+/* Tab 2: Resource Manager & Fault Isolation */
+#tab2-split {
+    layout: horizontal;
+    height: 100%;
+}
+
+#tab2-left-pane {
+    width: 50%;
+    height: 100%;
+    border-right: solid #30363d;
+    padding: 1;
+}
+
+#tab2-right-pane {
+    width: 50%;
+    height: 100%;
+    padding: 1;
+}
+
+.pane-title {
+    text-style: bold;
+    color: #58a6ff;
+    margin-bottom: 1;
+}
+
+#sandbox-box {
+    border: round #30363d;
+    background: #161b22;
+    padding: 1;
+    height: auto;
+}
+
+#sandbox-status {
+    margin: 1 0;
+    color: #7ee787;
+    text-style: bold;
+}
+
+#sandbox-buttons {
+    layout: horizontal;
+    height: 3;
+    margin-top: 1;
+}
+
+#sandbox-buttons Button {
+    margin-right: 1;
+}
+
+#sandbox-procnto-status {
+    margin-top: 1;
+    background: #0d1117;
+    border: solid #238636;
+    padding: 1;
+    color: #3fb950;
+}
+
+/* Tab 3: slog2 Logs */
+#tab3-container {
+    height: 100%;
+    layout: vertical;
+}
+
+#log-toolbar {
+    height: 3;
+    layout: horizontal;
+    background: #161b22;
+    padding: 0 1;
+    align: left middle;
+}
+
+#log-toolbar Button {
+    margin-right: 1;
+}
+
+#log-stream {
+    height: 1fr;
+    background: #0d1117;
+    border: solid #30363d;
+    padding: 0 1;
+}
+
+/* Bottom Command Translator Dock */
+#translator-dock {
+    dock: bottom;
+    height: auto;
+    background: #161b22;
+    border-top: heavy #30363d;
+    padding: 1;
+}
+
+#translator-input {
+    width: 100%;
+    border: solid #58a6ff;
+    background: #0d1117;
+    color: #ffffff;
+}
+
+#translator-preview {
+    margin-top: 1;
+    color: #a5d6ff;
+}
+
+#translator-explanation {
+    color: #8b949e;
+    text-style: italic;
+}
+
+#translator-warning {
+    color: #f85149;
+    text-style: bold;
+}
+
+#output-drawer {
+    height: 8;
+    border: solid #30363d;
+    background: #0d1117;
+    margin-top: 1;
+    display: none;
+}
+
+#output-drawer.open {
+    display: block;
+}
+
+/* Footer Keybindings */
+#footer-bar {
+    dock: bottom;
+    height: 1;
+    background: #21262d;
+    color: #8b949e;
+    padding: 0 1;
+    text-align: center;
+}
+
+/* Modals */
+ModalScreen {
+    align: center middle;
+    background: rgba(13, 17, 23, 0.85);
+}
+
+.modal-dialog {
+    width: 70;
+    height: auto;
+    border: heavy #58a6ff;
+    background: #161b22;
+    padding: 1 2;
+}
+
+.modal-title {
+    text-style: bold;
+    color: #58a6ff;
+    margin-bottom: 1;
+}
+
+.modal-buttons {
+    layout: horizontal;
+    align: right middle;
+    margin-top: 1;
+}
+
+.modal-buttons Button {
+    margin-left: 1;
+}
+
+.danger-dialog {
+    border: heavy #da3633;
+}
+
+.danger-title {
+    color: #f85149;
+    text-style: bold;
+}
