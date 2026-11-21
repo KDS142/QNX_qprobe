@@ -94,7 +94,7 @@ class HelpModal(ModalScreen[None]):
 
     def compose(self) -> ComposeResult:
         with Container(classes="modal-dialog"):
-            yield Label("qnx-inspector Keybindings & Navigation", classes="modal-title")
+            yield Label("qprobe Keybindings & Navigation", classes="modal-title")
             help_text = (
                 "[b]Global Keybindings:[/b]\n"
                 "  [cyan]F1[/cyan]    : Tab 1 — Threads, Scheduling & Priority Inversions\n"

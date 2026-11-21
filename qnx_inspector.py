@@ -42,8 +42,9 @@ from ui.modals import ConfirmSlayModal, DeployModal, HelpModal
 
 
 class QNXInspector(App):
-    """Main Textual Application for qnx-inspector."""
+    """Main Textual Application for qprobe."""
 
+    TITLE = "qprobe"
     CSS_PATH = "ui/styles.tcss"
 
     BINDINGS = [
@@ -92,7 +93,7 @@ class QNXInspector(App):
     def compose(self) -> ComposeResult:
         # Header Status Bar
         with Horizontal(id="header-bar"):
-            yield Label("qnx-inspector", id="header-title")
+            yield Label("qprobe", id="header-title")
             badge_text = "DEMO MODE" if self.is_demo else f"LIVE: {self.host_label}"
             badge_class = "badge-demo" if self.is_demo else "badge-live"
             yield Label(badge_text, id="status-badge", classes=badge_class)
@@ -492,7 +493,7 @@ class QNXInspector(App):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="qnx-inspector: Terminal User Interface for QNX SDP 8.0 Targets."
+        description="qprobe: Terminal User Interface for QNX SDP 8.0 Targets. Launch command: python qnx_inspector.py"
     )
     parser.add_argument("--host", default="localhost", help="QNX target host (default: localhost)")
     parser.add_argument("--port", type=int, default=2222, help="SSH port (default: 2222)")

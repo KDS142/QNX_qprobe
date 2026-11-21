@@ -19,7 +19,7 @@ def generate_markdown_report(
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     md = []
-    md.append(f"# QNX 8.0 System Diagnostic Snapshot")
+    md.append(f"# qprobe: QNX 8.0 System Diagnostic Snapshot")
     md.append(f"**Generated:** {now_str} | **Target:** `{sys_info.host_target}`\n")
 
     # 1. System & Microkernel Information
