@@ -34,6 +34,7 @@ class InversionAlert:
     server_name: str
     server_priority: int
     severity: str = "CRITICAL"
+    chain: list[str] = field(default_factory=list)
     timestamp: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
     @property

@@ -33,11 +33,12 @@ def generate_markdown_report(
     md.append("## 2. Priority Inversion & IPC Blocking Analysis")
     if alerts:
         md.append(f"> [!CAUTION]\n> **Detected {len(alerts)} Active Priority Inversion Condition(s)!**\n")
-        md.append("| Severity | Client PID | Client Thread | Priority | Blocked On Server | Server Priority |")
-        md.append("|---|---|---|---|---|---|")
+        md.append("| Severity | Client PID | Client Thread | Priority | Blocked On Server | Server Priority | Transitive Chain |")
+        md.append("|---|---|---|---|---|---|---|")
         for a in alerts:
+            chain_str = " ➔ ".join(a.chain) if a.chain else f"{a.client_name} ➔ {a.server_name}"
             md.append(
-                f"| **{a.severity}** | {a.client_pid}.{a.client_tid} | `{a.client_name}` | `{a.client_priority}` | `{a.server_name}` (PID {a.server_pid}) | `{a.server_priority}` |"
+                f"| **{a.severity}** | {a.client_pid}.{a.client_tid} | `{a.client_name}` | `{a.client_priority}` | `{a.server_name}` (PID {a.server_pid}) | `{a.server_priority}` | `{chain_str}` |"
             )
         md.append("")
     else:

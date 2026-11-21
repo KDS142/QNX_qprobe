@@ -92,7 +92,8 @@ class SSHClient(BaseExecutor):
 
     def exec_command(self, command: str) -> Tuple[int, str, str]:
         if not self._connected or not self._client:
-            return 1, "", "Not connected to QNX target."
+            if not self.connect():
+                return 1, "", "Not connected to QNX target."
         try:
             stdin, stdout, stderr = self._client.exec_command(command, timeout=self.timeout)
             out_str = stdout.read().decode("utf-8", errors="replace")
@@ -100,11 +101,13 @@ class SSHClient(BaseExecutor):
             exit_code = stdout.channel.recv_exit_status()
             return exit_code, out_str, err_str
         except Exception as e:
+            self._connected = False
             return 1, "", str(e)
 
     def upload_file(self, local_path: str, remote_path: str) -> bool:
         if not self._connected or not self._client:
-            return False
+            if not self.connect():
+                return False
         try:
             sftp = self._client.open_sftp()
             sftp.put(local_path, remote_path)

@@ -62,6 +62,56 @@ def test_priority_inversion_detection(sample_snapshot):
     assert alert.server_name == "sensor_aggregator"
     assert alert.server_priority == 10
     assert alert.severity == "CRITICAL"
+    assert len(alert.chain) == 2
+    assert "telemetry_collector" in alert.chain[0]
+    assert "sensor_aggregator" in alert.chain[1]
+
+
+def test_transitive_priority_inversion_chain():
+    # Multi-hop transitive inversion: Thread A (30f) -> Server B (20r) -> Server C (10r)
+    threads = [
+        ThreadRecord(
+            pid=100,
+            tid=1,
+            name="client_app",
+            priority=30,
+            policy="FIFO",
+            priority_raw="30f",
+            state="REPLY",
+            blocked_on="200",
+        ),
+        ThreadRecord(
+            pid=200,
+            tid=1,
+            name="intermediate_service",
+            priority=20,
+            policy="RR",
+            priority_raw="20r",
+            state="REPLY",
+            blocked_on="300",
+        ),
+        ThreadRecord(
+            pid=300,
+            tid=1,
+            name="backend_driver",
+            priority=10,
+            policy="RR",
+            priority_raw="10r",
+            state="RUNNING",
+        ),
+    ]
+
+    alerts = detect_priority_inversions(threads)
+    assert len(alerts) >= 1
+
+    # First alert should trace the full 3-hop chain
+    top_alert = next(a for a in alerts if a.client_pid == 100)
+    assert top_alert.client_priority == 30
+    assert top_alert.server_priority == 20
+    assert len(top_alert.chain) == 3
+    assert "client_app" in top_alert.chain[0]
+    assert "intermediate_service" in top_alert.chain[1]
+    assert "backend_driver" in top_alert.chain[2]
 
 
 def test_extract_server_pid():

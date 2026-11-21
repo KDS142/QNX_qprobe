@@ -82,6 +82,8 @@ class QNXInspector(App):
         self.filter_blocked_only = False
         self.log_severity_filter = "ALL"  # 'ALL', 'WARNING+', 'ERROR'
         self.log_autoscroll = True
+        self.sort_col_index = 3  # Default sort by Priority
+        self.sort_descending = True
 
     @property
     def has_active_screen(self) -> bool:
@@ -237,7 +239,26 @@ class QNXInspector(App):
         alert_client_pids = {a.client_pid for a in self.alerts}
         alert_server_pids = {a.server_pid for a in self.alerts}
 
-        for t in self.threads:
+        def get_sort_key(t: ThreadRecord):
+            if self.sort_col_index == 0:
+                return t.pid
+            elif self.sort_col_index == 1:
+                return t.tid
+            elif self.sort_col_index == 2:
+                return t.name.lower()
+            elif self.sort_col_index == 3:
+                return t.priority
+            elif self.sort_col_index == 4:
+                return t.policy
+            elif self.sort_col_index == 5:
+                return t.state
+            elif self.sort_col_index == 6:
+                return t.blocked_on
+            return t.priority
+
+        sorted_threads = sorted(self.threads, key=get_sort_key, reverse=self.sort_descending)
+
+        for t in sorted_threads:
             if self.filter_blocked_only and not (t.is_blocked or t.pid in alert_client_pids):
                 continue
 
@@ -261,6 +282,16 @@ class QNXInspector(App):
                 state_display,
                 blocked_display,
             )
+
+    def on_data_table_header_selected(self, event: DataTable.HeaderSelected) -> None:
+        """Handles clicking table headers to sort columns."""
+        if event.data_table.id == "threads-table":
+            if self.sort_col_index == event.column_index:
+                self.sort_descending = not self.sort_descending
+            else:
+                self.sort_col_index = event.column_index
+                self.sort_descending = event.column_index in {0, 3}
+            self._update_threads_table()
 
     def _update_dev_table(self) -> None:
         table = self.query_one("#dev-table", DataTable)
@@ -320,13 +351,15 @@ class QNXInspector(App):
             pol = result["policy_flag"]
             remote_dest = f"/tmp/{os.path.basename(file_path)}"
 
-            # SFTP Upload
-            uploaded = self.executor.upload_file(file_path, remote_dest)
-            launch_cmd = f"on -p {prio}{pol} {remote_dest} &"
-            code, out, err = self.executor.exec_command(launch_cmd)
-
             drawer = self.query_one("#output-drawer", RichLog)
             drawer.add_class("open")
+            drawer.write(f"[dim]Deploying {file_path} to {remote_dest}...[/]")
+
+            # SFTP Upload in worker thread
+            uploaded = await asyncio.to_thread(self.executor.upload_file, file_path, remote_dest)
+            launch_cmd = f"on -p {prio}{pol} {remote_dest} &"
+            code, out, err = await asyncio.to_thread(self.executor.exec_command, launch_cmd)
+
             status = "Uploaded & Launched" if uploaded else "Spawned"
             drawer.write(f"[bold green]{status}:[/] {launch_cmd}\n{out or err}")
             self.refresh_telemetry()
@@ -381,7 +414,8 @@ class QNXInspector(App):
             if translation.requires_confirm:
                 async def handle_confirm(confirmed: bool) -> None:
                     if confirmed:
-                        code, out, err = self.executor.exec_command(qnx_cmd)
+                        drawer.write(f"[dim]Executing: {qnx_cmd}...[/]")
+                        code, out, err = await asyncio.to_thread(self.executor.exec_command, qnx_cmd)
                         drawer.write(f"[cyan]$ {qnx_cmd}[/]\n{out or err}")
                         self.refresh_telemetry()
                     else:
@@ -396,7 +430,8 @@ class QNXInspector(App):
                     handle_confirm,
                 )
             else:
-                code, out, err = self.executor.exec_command(qnx_cmd)
+                drawer.write(f"[dim]Executing: {qnx_cmd}...[/]")
+                code, out, err = await asyncio.to_thread(self.executor.exec_command, qnx_cmd)
                 drawer.write(f"[cyan]$ {qnx_cmd}[/]\n{out or err}")
                 self.refresh_telemetry()
 
