@@ -17,9 +17,12 @@ def is_protected_target(target: str) -> Tuple[bool, str]:
         if pid in DANGEROUS_PIDS or pid <= 10:
             return True, f"Target PID {pid} is a core microkernel or base driver process (PID <= 10)."
     else:
-        for p in PROTECTED_PROCESSES:
-            if clean_target == p or clean_target.startswith("procnto"):
-                return True, f"Target process '{target}' is critical for system operation (procnto/sshd/slogger2)."
+        # Check exact match against protected process names
+        if clean_target in PROTECTED_PROCESSES:
+            return True, f"Target process '{target}' is critical for system operation (procnto/sshd/slogger2)."
+        # Check procnto variants (procnto-smp, procnto-smp-instr, etc.)
+        if clean_target.startswith("procnto"):
+            return True, f"Target process '{target}' is critical for system operation (procnto variant)."
     return False, ""
 
 

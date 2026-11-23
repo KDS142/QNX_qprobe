@@ -1,5 +1,6 @@
 """Component and integration tests for QNXInspector app logic in demo mode."""
 import os
+import tempfile
 from core.ssh_client import DemoExecutor
 from qnx_inspector import QNXInspector
 
@@ -63,16 +64,15 @@ def test_qnx_inspector_telemetry_flow():
     assert "mock_qnx_service.sh" in active_names_after_respawn
 
     # 6. Test F5 Export Snapshot
-    app.action_export_snapshot()
-    exported_md = [f for f in os.listdir(".") if f.startswith("qnx_report_") and f.endswith(".md")]
-    exported_json = [f for f in os.listdir(".") if f.startswith("qnx_report_") and f.endswith(".json")]
-
-    assert len(exported_md) > 0
-    assert len(exported_json) > 0
-
-    # Clean up test output files
-    for f in exported_md + exported_json:
-        try:
-            os.remove(f)
-        except OSError:
-            pass
+    with tempfile.TemporaryDirectory() as tmpdir:
+        from core.exporter import export_diagnostic_snapshot
+        md_path, json_path = export_diagnostic_snapshot(
+            app.system_info,
+            app.threads,
+            app.alerts,
+            app.dev_mounts,
+            app.logs,
+            output_dir=tmpdir,
+        )
+        assert os.path.exists(md_path)
+        assert os.path.exists(json_path)

@@ -60,6 +60,9 @@ class SSHClient(BaseExecutor):
             import paramiko
 
             client = paramiko.SSHClient()
+            # NOTE: AutoAddPolicy auto-accepts unknown host keys for convenience
+            # in development/hackathon QEMU targets. For production use, replace
+            # with paramiko.RejectPolicy() and load known_hosts explicitly.
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             connect_kwargs = {
@@ -175,16 +178,22 @@ class DemoExecutor(BaseExecutor):
             return 0, f"Process {target} terminated.\n", ""
 
         # Handle on -p priority launcher simulation / restart
-        if "mock_qnx_service.sh" in cmd:
-            self.mock_service_killed = False
-            return 0, "Spawned /tmp/mock_qnx_service.sh with PID 1420 at priority 10r.\n", ""
-
         if "on -p" in cmd:
             match = re.search(r"on -p (\d+)([fr])\s+(.+)", cmd)
             if match:
                 prio, pol, bin_name = match.groups()
+                bin_name = bin_name.rstrip("& ").strip()
+                # If launching mock_qnx_service.sh, treat as respawn
+                if "mock_qnx_service.sh" in bin_name:
+                    self.mock_service_killed = False
+                    return 0, f"Spawned {bin_name} with PID 1420 at priority {prio}{pol}.\n", ""
                 return 0, f"Spawned {bin_name} with PID 2048 under priority {prio}{pol}.\n", ""
             return 0, "Spawned process successfully.\n", ""
+
+        # Handle direct mock_qnx_service.sh restart without on -p
+        if "mock_qnx_service.sh" in cmd:
+            self.mock_service_killed = False
+            return 0, "Spawned /tmp/mock_qnx_service.sh with PID 1420 at priority 10r.\n", ""
 
         # Thread & IPC query
         if "pidin -F" in cmd:

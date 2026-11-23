@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from core.models import ThreadRecord, InversionAlert, DevMount, LogEntry, SystemInfo
 
 

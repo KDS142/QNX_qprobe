@@ -78,6 +78,7 @@ class QNXInspector(App):
         self.dev_mounts: list[DevMount] = []
         self.logs: list[LogEntry] = []
         self.seen_log_signatures: Set[str] = set()
+        self.MAX_LOG_SIGNATURES = 10000  # Bound memory for long-running sessions
 
         # UI state
         self.filter_blocked_only = False
@@ -213,6 +214,9 @@ class QNXInspector(App):
         # 4. slog2 Logs (slog2info -S)
         _, raw_logs, _ = self.executor.exec_command("slog2info -S")
         if raw_logs:
+            # Bound the deduplication set to prevent unbounded memory growth
+            if len(self.seen_log_signatures) > self.MAX_LOG_SIGNATURES:
+                self.seen_log_signatures.clear()
             new_entries = parse_slog2info(raw_logs, self.seen_log_signatures)
             if new_entries:
                 self.logs.extend(new_entries)
